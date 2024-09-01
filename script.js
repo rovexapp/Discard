@@ -1,90 +1,157 @@
-document.addEventListener("DOMContentLoaded", function() {
-    const groupListPage = document.getElementById('group-list-page');
-    const createGroupPage = document.getElementById('create-group-page');
-    const chatPage = document.getElementById('chat-page');
-    const groupList = document.getElementById('group-list');
-    const addGroupBtn = document.getElementById('add-group-btn');
-    const createGroupForm = document.getElementById('create-group-form');
-    const groupChatName = document.getElementById('group-chat-name');
-    const groupChatPic = document.getElementById('group-chat-pic');
-    const chatMessages = document.getElementById('chat-messages');
-    const messageInput = document.getElementById('message-input');
-    const sendMessageBtn = document.getElementById('send-message-btn');
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f1f1f1;
+    margin: 0;
+    padding: 0;
+}
 
-    let groups = JSON.parse(localStorage.getItem('groups')) || [];
-    let currentGroup = null;
+.container {
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-    function renderGroups() {
-        groupList.innerHTML = '';
-        groups.forEach((group, index) => {
-            const li = document.createElement('li');
-            li.innerHTML = `<img src="${group.profilePic || 'default.jpg'}" alt="صورة القروب" style="width:40px; height:40px; border-radius:50%; margin-right:10px;">
-                            <span>${group.name}</span>`;
-            li.addEventListener('click', () => openChat(index));
-            groupList.appendChild(li);
-        });
-    }
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-    function openChat(index) {
-        currentGroup = groups[index];
-        groupChatName.textContent = currentGroup.name;
-        groupChatPic.src = currentGroup.profilePic || 'default.jpg';
-        groupListPage.style.display = 'none';
-        chatPage.style.display = 'block';
-        renderMessages();
-    }
+.groups-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-    function renderMessages() {
-        chatMessages.innerHTML = '';
-        currentGroup.messages.forEach((msg, index) => {
-            const div = document.createElement('div');
-            div.classList.add('message', msg.sent ? 'sent' : 'received');
-            div.innerHTML = `<img src="${msg.userPic || 'default-user.jpg'}" alt="صورة المستخدم"><span>${msg.userName}</span><br>${msg.text}`;
-            chatMessages.appendChild(div);
-        });
-    }
+.group-item {
+    display: flex;
+    align-items: center;
+    background-color: #ececec;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
-    addGroupBtn.addEventListener('click', () => {
-        groupListPage.style.display = 'none';
-        createGroupPage.style.display = 'block';
-    });
+.group-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
 
-    createGroupForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const groupName = document.getElementById('group-name').value;
-        const groupProfilePic = document.getElementById('group-profile-pic').files[0];
-        const groupDescription = document.getElementById('group-description').value;
+.add-group-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    font-size: 24px;
+    border: none;
+    cursor: pointer;
+}
 
-        const newGroup = {
-            name: groupName,
-            profilePic: groupProfilePic ? URL.createObjectURL(groupProfilePic) : null,
-            description: groupDescription,
-            users: [],
-            messages: []
-        };
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
 
-        groups.push(newGroup);
-        localStorage.setItem('groups', JSON.stringify(groups));
-        renderGroups();
-        groupListPage.style.display = 'block';
-        createGroupPage.style.display = 'none';
-    });
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 500px;
+}
 
-    sendMessageBtn.addEventListener('click', () => {
-        const messageText = messageInput.value;
-        if (messageText.trim() !== '') {
-            currentGroup.messages.push({
-                userName: 'المالك',
-                userPic: 'default-owner.jpg',
-                text: messageText,
-                sent: true,
-                timestamp: new Date().toLocaleString()
-            });
-            localStorage.setItem('groups', JSON.stringify(groups));
-            renderMessages();
-            messageInput.value = '';
-        }
-    });
+.close-btn {
+    float: right;
+    cursor: pointer;
+    font-size: 24px;
+}
 
-    renderGroups();
-});
+.chat-window {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background-color: #007bff;
+    color: white;
+}
+
+.chat-header img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.message {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 70%;
+}
+
+.message.mine {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+}
+
+.message.other {
+    background-color: #ececec;
+    align-self: flex-start;
+}
+
+.message-input {
+    display: flex;
+    padding: 10px;
+    background-color: #ececec;
+}
+
+.message-input input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+.message-input button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
