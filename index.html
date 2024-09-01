@@ -7,48 +7,42 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
+    <div id="app">
         <header>
-            <h1>Your Groups</h1>
+            <h1>My Groups</h1>
+            <button id="createGroupBtn">+ Create Group</button>
         </header>
-
-        <main id="group-list">
-            <!-- Group items will be inserted here -->
-        </main>
-
-        <footer>
-            <button id="create-group-btn">+</button>
-        </footer>
+        <div id="groupList"></div>
     </div>
 
-    <!-- Modal for creating a group -->
-    <div id="group-modal" class="modal">
+    <!-- Modal for Creating Group -->
+    <div id="createGroupModal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Create a Group</h2>
-            <form id="group-form">
-                <input type="text" id="group-name" placeholder="Group Name" required>
-                <input type="file" id="group-image" accept="image/*">
-                <textarea id="group-description" placeholder="Group Description"></textarea>
-                <input type="number" id="user-count" placeholder="Number of Users" required min="1">
-                <div id="user-details"></div>
-                <button type="submit">Create Group</button>
-            </form>
+            <h2>Create Group</h2>
+            <label for="groupName">Group Name:</label>
+            <input type="text" id="groupName" placeholder="Enter group name">
+            
+            <label for="groupDescription">Group Description:</label>
+            <textarea id="groupDescription" placeholder="Enter group description"></textarea>
+            
+            <label for="groupUsers">Number of Users:</label>
+            <input type="number" id="groupUsers" min="1" max="100" value="1">
+            
+            <div id="userFields"></div>
+            
+            <button id="createGroup">Create Group</button>
         </div>
     </div>
 
-    <!-- Modal for chatting -->
-    <div id="chat-modal" class="modal">
-        <div class="chat-header">
-            <img id="chat-group-image" src="" alt="Group Image">
-            <h2 id="chat-group-name"></h2>
-        </div>
-        <div id="chat-content">
-            <!-- Messages will be inserted here -->
-        </div>
-        <div class="chat-footer">
-            <input type="text" id="chat-message" placeholder="Type a message">
-            <button id="send-message-btn">Send</button>
+    <!-- Modal for Chat -->
+    <div id="chatModal" class="modal">
+        <div class="modal-content">
+            <header id="chatHeader"></header>
+            <div id="messages"></div>
+            <div id="messageInputContainer">
+                <input type="text" id="messageInput" placeholder="Type your message...">
+                <button id="sendMessage">Send</button>
+            </div>
         </div>
     </div>
 
