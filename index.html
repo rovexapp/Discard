@@ -3,81 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق الدردشة</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .group-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .group-item {
-            display: flex;
-            align-items: center;
-            background-color: white;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            position: relative;
-        }
-
-        .group-item img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .group-item h3 {
-            margin: 0;
-        }
-
-        .group-item button {
-            position: absolute;
-            right: 10px;
-            background-color: transparent;
-            border: none;
-            color: red;
-            cursor: pointer;
-        }
-
-        .add-group-btn {
-            background-color: #0084ff;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-        }
+    <link rel="stylesheet" href="styles.css">
+    <title>Discard Chat<\title> 
     </style>
 </head>
 <body>
+    <div id="app">
+        <!-- الصفحة الرئيسية: قائمة القروبات -->
+        <div id="group-list-page">
+            <h1>قائمة القروبات</h1>
+            <ul id="group-list"></ul>
+            <button id="add-group-btn">+ إنشاء قروب</button>
+        </div>
 
-    <div class="group-list" id="group-list">
-        <!-- قروبات سيتم عرضها هنا -->
-    </div>
+        <!-- صفحة إنشاء القروب -->
+        <div id="create-group-page" style="display:none;">
+            <h1>إنشاء قروب جديد</h1>
+            <form id="create-group-form">
+                <label>اسم القروب:</label>
+                <input type="text" id="group-name" required>
 
-    <button class="add-group-btn" onclick="openAddGroupModal()">+</button>
+                <label>صورة بروفايل القروب:</label>
+                <input type="file" id="group-profile-pic">
 
-    <!-- نافذة منبثقة لإنشاء قروب جديد -->
-    <div id="add-group-modal" style="display:none;">
-        <!-- محتويات النافذة المنبثقة -->
+                <label>نبذة عن القروب:</label>
+                <textarea id="group-description"></textarea>
+
+                <label>عدد المستخدمين:</label>
+                <input type="number" id="user-count" min="1" required>
+
+                <div id="users-info"></div>
+
+                <button type="submit">إنشاء</button>
+            </form>
+        </div>
+
+        <!-- صفحة الدردشة -->
+        <div id="chat-page" style="display:none;">
+            <div id="group-header">
+                <img id="group-chat-pic" src="" alt="صورة القروب">
+                <h2 id="group-chat-name"></h2>
+            </div>
+            <div id="chat-messages"></div>
+            <div id="chat-input">
+                <input type="text" id="message-input" placeholder="اكتب رسالتك...">
+                <button id="send-message-btn">إرسال</button>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
