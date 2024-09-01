@@ -1,88 +1,90 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener("DOMContentLoaded", function() {
+    const groupListPage = document.getElementById('group-list-page');
+    const createGroupPage = document.getElementById('create-group-page');
+    const chatPage = document.getElementById('chat-page');
     const groupList = document.getElementById('group-list');
-    const addGroupModal = document.getElementById('add-group-modal');
+    const addGroupBtn = document.getElementById('add-group-btn');
+    const createGroupForm = document.getElementById('create-group-form');
+    const groupChatName = document.getElementById('group-chat-name');
+    const groupChatPic = document.getElementById('group-chat-pic');
+    const chatMessages = document.getElementById('chat-messages');
+    const messageInput = document.getElementById('message-input');
+    const sendMessageBtn = document.getElementById('send-message-btn');
 
-    // تحميل القروبات من Local Storage
     let groups = JSON.parse(localStorage.getItem('groups')) || [];
-
-    function saveGroups() {
-        localStorage.setItem('groups', JSON.stringify(groups));
-    }
+    let currentGroup = null;
 
     function renderGroups() {
         groupList.innerHTML = '';
         groups.forEach((group, index) => {
-            const groupItem = document.createElement('div');
-            groupItem.classList.add('group-item');
-            groupItem.innerHTML = `
-                <img src="${group.image || generateDefaultImage(group.name)}" alt="صورة القروب">
-                <h3>${group.name}</h3>
-                <button onclick="deleteGroup(${index})">حذف</button>
-            `;
-            groupItem.onclick = function () {
-                openChat(index);
-            };
-            groupList.appendChild(groupItem);
+            const li = document.createElement('li');
+            li.innerHTML = `<img src="${group.profilePic || 'default.jpg'}" alt="صورة القروب" style="width:40px; height:40px; border-radius:50%; margin-right:10px;">
+                            <span>${group.name}</span>`;
+            li.addEventListener('click', () => openChat(index));
+            groupList.appendChild(li);
         });
     }
 
-    function openAddGroupModal() {
-        // منطق فتح النافذة المنبثقة لإنشاء قروب جديد
-        const name = prompt('أدخل اسم القروب:');
-        const image = prompt('أدخل رابط الصورة (اختياري):');
-        const description = prompt('أدخل نبذة عن القروب:');
-        const usersCount = prompt('أدخل عدد المستخدمين:');
+    function openChat(index) {
+        currentGroup = groups[index];
+        groupChatName.textContent = currentGroup.name;
+        groupChatPic.src = currentGroup.profilePic || 'default.jpg';
+        groupListPage.style.display = 'none';
+        chatPage.style.display = 'block';
+        renderMessages();
+    }
 
-        const users = [];
-        for (let i = 0; i < usersCount; i++) {
-            const userName = prompt(`أدخل اسم المستخدم ${i + 1}:`);
-            const userImage = prompt(`أدخل رابط صورة المستخدم ${i + 1} (اختياري):`);
-            const userCountry = prompt(`أدخل البلد للمستخدم ${i + 1}:`);
-            const userDescription = prompt(`أدخل نبذة عن المستخدم ${i + 1}:`);
-            const isOwner = confirm(`هل هذا المستخدم ${i + 1} هو المالك؟`);
-            const isAdmin = confirm(`هل هذا المستخدم ${i + 1} مشرف؟`);
+    function renderMessages() {
+        chatMessages.innerHTML = '';
+        currentGroup.messages.forEach((msg, index) => {
+            const div = document.createElement('div');
+            div.classList.add('message', msg.sent ? 'sent' : 'received');
+            div.innerHTML = `<img src="${msg.userPic || 'default-user.jpg'}" alt="صورة المستخدم"><span>${msg.userName}</span><br>${msg.text}`;
+            chatMessages.appendChild(div);
+        });
+    }
 
-            users.push({
-                name: userName,
-                image: userImage,
-                country: userCountry,
-                description: userDescription,
-                isOwner: isOwner,
-                isAdmin: isAdmin
-            });
-        }
+    addGroupBtn.addEventListener('click', () => {
+        groupListPage.style.display = 'none';
+        createGroupPage.style.display = 'block';
+    });
+
+    createGroupForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const groupName = document.getElementById('group-name').value;
+        const groupProfilePic = document.getElementById('group-profile-pic').files[0];
+        const groupDescription = document.getElementById('group-description').value;
 
         const newGroup = {
-            name: name,
-            image: image,
-            description: description,
-            users: users
+            name: groupName,
+            profilePic: groupProfilePic ? URL.createObjectURL(groupProfilePic) : null,
+            description: groupDescription,
+            users: [],
+            messages: []
         };
 
         groups.push(newGroup);
-        saveGroups();
+        localStorage.setItem('groups', JSON.stringify(groups));
         renderGroups();
-    }
+        groupListPage.style.display = 'block';
+        createGroupPage.style.display = 'none';
+    });
 
-    function generateDefaultImage(groupName) {
-        const initials = groupName.split(' ').map(word => word.charAt(0)).join('');
-        const colors = ['#f28b82', '#fbbc04', '#34a853', '#4285f4', '#ea4335'];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-
-        return `https://via.placeholder.com/50/${color.substring(1)}/ffffff?text=${initials}`;
-    }
-
-    function deleteGroup(index) {
-        groups.splice(index, 1);
-        saveGroups();
-        renderGroups();
-    }
-
-    function openChat(groupIndex) {
-        const group = groups[groupIndex];
-        alert(`دخول للدردشة مع ${group.name}`);
-        // هنا يمكن فتح صفحة الدردشة الخاصة بالقروب
-    }
+    sendMessageBtn.addEventListener('click', () => {
+        const messageText = messageInput.value;
+        if (messageText.trim() !== '') {
+            currentGroup.messages.push({
+                userName: 'المالك',
+                userPic: 'default-owner.jpg',
+                text: messageText,
+                sent: true,
+                timestamp: new Date().toLocaleString()
+            });
+            localStorage.setItem('groups', JSON.stringify(groups));
+            renderMessages();
+            messageInput.value = '';
+        }
+    });
 
     renderGroups();
 });
