@@ -46,7 +46,7 @@ function addMessage(user, text, channel) {
 
 function renderMessage({ user, text }) {
     const messageDiv = document.createElement('div');
-    messageDiv.className = 'message';
+    messageDiv.className = `message ${user === 'مستخدم 1' ? 'user' : ''}`;
     messageDiv.textContent = `${user}: ${text}`;
     chatBox.appendChild(messageDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
