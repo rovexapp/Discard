@@ -8,18 +8,17 @@
 </head>
 <body>
     <div class="app-container">
-        <aside id="sidebar" class="sidebar">
-            <h2>القنوات</h2>
-            <ul id="channel-list">
-                <li class="channel active" data-channel="general">عام</li>
-                <li class="channel" data-channel="random">عشوائي</li>
-                <li class="channel" data-channel="tech">تكنولوجيا</li>
-                <li class="channel" data-channel="games">ألعاب</li>
-            </ul>
-        </aside>
-
         <div class="chat-section">
             <button id="toggle-sidebar" class="toggle-sidebar">☰</button>
+            <aside id="sidebar" class="sidebar hidden">
+                <h2>القنوات</h2>
+                <ul id="channel-list">
+                    <li class="channel active" data-channel="general">عام</li>
+                    <li class="channel" data-channel="random">عشوائي</li>
+                    <li class="channel" data-channel="tech">تكنولوجيا</li>
+                    <li class="channel" data-channel="games">ألعاب</li>
+                </ul>
+            </aside>
             <div id="chat-box" class="chat-box"></div>
             <div class="input-section">
                 <input type="text" id="message-input" placeholder="اكتب رسالتك هنا...">
