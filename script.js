@@ -1,154 +1,208 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const groupsList = document.getElementById("groups-list");
-    const addGroupBtn = document.getElementById("add-group-btn");
-    const createGroupModal = document.getElementById("create-group-modal");
-    const closeModalBtn = document.getElementById("close-modal");
-    const createGroupBtn = document.getElementById("create-group-btn");
-    const chatWindow = document.getElementById("chat-window");
-    const chatGroupName = document.getElementById("chat-group-name");
-    const chatGroupImage = document.getElementById("chat-group-image");
-    const messagesContainer = document.getElementById("messages");
-    const messageInput = document.getElementById("message-input");
+document.addEventListener("DOMContentLoaded", function () {
+  // تحميل القروبات من Local Storage
+  let groups = JSON.parse(localStorage.getItem("groups")) || [];
+
+  const groupListElement = document.getElementById("group-list");
+  const addGroupBtn = document.getElementById("add-group-btn");
+
+  // عرض القروبات في القائمة
+  function displayGroups() {
+    groupListElement.innerHTML = "";
+    groups.forEach((group, index) => {
+      const groupElement = document.createElement("div");
+      groupElement.className = "group";
+      groupElement.innerHTML = `
+        <img src="${group.image}" alt="${group.name}" class="group-image">
+        <span class="group-name">${group.name}</span>
+      `;
+      groupElement.addEventListener("click", () => openChat(index));
+      groupElement.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        showGroupOptions(index);
+      });
+      groupListElement.appendChild(groupElement);
+    });
+  }
+
+  // فتح الدردشة للقروب
+  function openChat(groupIndex) {
+    const group = groups[groupIndex];
+    const chatElement = document.getElementById("chat");
+    const groupHeaderElement = document.getElementById("group-header");
+    const chatMessagesElement = document.getElementById("chat-messages");
     const sendMessageBtn = document.getElementById("send-message-btn");
+    const messageInput = document.getElementById("message-input");
 
-    let groups = JSON.parse(localStorage.getItem("groups")) || [];
-    let currentGroup = null;
-    let currentUser = null;
+    chatMessagesElement.innerHTML = "";
 
-    function saveGroups() {
-        localStorage.setItem("groups", JSON.stringify(groups));
-    }
-
-    function renderGroups() {
-        groupsList.innerHTML = "";
-        groups.forEach((group, index) => {
-            const groupItem = document.createElement("div");
-            groupItem.className = "group-item";
-            groupItem.innerHTML = `
-                <img src="${group.image || getDefaultGroupImage(group.name)}" alt="${group.name}">
-                <div>${group.name}</div>
-            `;
-            groupItem.addEventListener("click", () => openGroupChat(index));
-            groupsList.appendChild(groupItem);
-        });
-    }
-
-    function openGroupChat(index) {
-        currentGroup = groups[index];
-        chatGroupName.innerText = currentGroup.name;
-        chatGroupImage.src = currentGroup.image || getDefaultGroupImage(currentGroup.name);
-        renderMessages();
-        chatWindow.style.display = "flex";
-    }
-
-    function renderMessages() {
-        messagesContainer.innerHTML = "";
-        currentGroup.messages.forEach((message) => {
-            const messageElement = document.createElement("div");
-            messageElement.className = `message ${message.sender === currentUser ? "mine" : "other"}`;
-            messageElement.innerHTML = `
-                <strong>${message.sender}</strong> - <small>${message.time}</small>
-                <p>${message.text}</p>
-            `;
-            messagesContainer.appendChild(messageElement);
-        });
-    }
-
-    function sendMessage() {
-        const text = messageInput.value.trim();
-        if (text) {
-            const message = {
-                sender: currentUser,
-                text,
-                time: new Date().toLocaleTimeString(),
-            };
-            currentGroup.messages.push(message);
-            messageInput.value = "";
-            renderMessages();
-            saveGroups();
-        }
-    }
-
-    function getDefaultGroupImage(name) {
-        const initials = name.split(" ").map(word => word[0]).join("");
-        return `https://via.placeholder.com/50/007bff/FFFFFF?text=${initials}`;
-    }
-
-    addGroupBtn.addEventListener("click", () => {
-        createGroupModal.style.display = "flex";
+    groupHeaderElement.innerHTML = `
+      <img src="${group.image}" alt="${group.name}" class="group-image">
+      <span class="group-name">${group.name}</span>
+    `;
+    groupHeaderElement.addEventListener("mousedown", (e) => {
+      if (e.which === 1) {
+        // إذا ضغط على الصورة لمدة 10 ثوانٍ، أظهر قائمة الحسابات
+        setTimeout(() => showAccountSwitchOptions(groupIndex), 10000);
+      }
     });
 
-    closeModalBtn.addEventListener("click", () => {
-        createGroupModal.style.display = "none";
+    group.messages.forEach((message) => {
+      const messageElement = document.createElement("div");
+      messageElement.className = message.sender.isOwner ? "message owner" : "message";
+      messageElement.innerHTML = `
+        <div class="message-info">
+          <span class="message-sender">${message.sender.name} ${message.sender.isOwner ? "(المالك)" : message.sender.isModerator ? "(مشرف)" : ""}</span>
+          <span class="message-timestamp" title="Edit">${message.timestamp}</span>
+        </div>
+        <div class="message-text">${message.text}</div>
+        <img src="${message.sender.image}" alt="${message.sender.name}" class="user-image">
+      `;
+      messageElement.querySelector(".message-timestamp").addEventListener("mousedown", (e) => {
+        if (e.which === 1) {
+          // إذا ضغط على الوقت لمدة 10 ثوانٍ، اسمح بتعديل الوقت
+          setTimeout(() => editMessageTimestamp(message), 10000);
+        }
+      });
+      chatMessagesElement.appendChild(messageElement);
     });
 
-    createGroupBtn.addEventListener("click", () => {
-        const groupName = document.getElementById("group-name").value.trim();
-        const groupImage = document.getElementById("group-image").files[0];
-        const groupDescription = document.getElementById("group-description").value.trim();
-        const numUsers = parseInt(document.getElementById("num-users").value.trim(), 10);
+    sendMessageBtn.onclick = function () {
+      const message = {
+        text: messageInput.value,
+        sender: group.currentUser,
+        timestamp: new Date().toLocaleString(),
+        read: false,
+      };
+      group.messages.push(message);
+      saveGroups();
+      displayGroups();
+      openChat(groupIndex);
+      messageInput.value = "";
+    };
+  }
 
-        if (!groupName || isNaN(numUsers) || numUsers < 1) {
-            alert("Please enter a valid group name and number of users.");
-            return;
-        }
+  // حفظ القروبات في Local Storage
+  function saveGroups() {
+    localStorage.setItem("groups", JSON.stringify(groups));
+  }
 
-        const usersInfo = [];
-        for (let i = 0; i < numUsers; i++) {
-            const userName = prompt(`Enter name for User ${i + 1}:`);
-            const isOwner = confirm(`Is ${userName} the group owner?`);
-            const isModerator = confirm(`Is ${userName} a moderator?`);
-            usersInfo.push({
-                name: userName,
-                isOwner: isOwner,
-                isModerator: isModerator,
-            });
-        }
+  // إنشاء قروب جديد
+  addGroupBtn.onclick = function () {
+    const groupName = prompt("أدخل اسم القروب:");
+    const groupImage = prompt("أدخل رابط صورة بروفايل القروب (اختياري):");
+    const groupDescription = prompt("أدخل نبذة عن القروب:");
+    const groupUsersCount = parseInt(prompt("أدخل عدد المستخدمين:"));
+    const users = [];
 
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const newGroup = {
-                name: groupName,
-                image: e.target.result,
-                description: groupDescription,
-                users: usersInfo,
-                messages: [],
-            };
-            groups.push(newGroup);
-            saveGroups();
-            renderGroups();
-            createGroupModal.style.display = "none";
-        };
+    for (let i = 0; i < groupUsersCount; i++) {
+      const userName = prompt(`أدخل اسم المستخدم ${i + 1}:`);
+      const userImage = prompt(`أدخل رابط صورة المستخدم ${i + 1} (اختياري):`);
+      const userCountry = prompt(`أدخل بلد المستخدم ${i + 1}:`);
+      const userDescription = prompt(`أدخل نبذة عن المستخدم ${i + 1}:`);
+      const isOwner = confirm(`هل المستخدم ${userName} هو المالك؟`);
+      const isModerator = confirm(`هل المستخدم ${userName} هو مشرف؟`);
 
-        if (groupImage) {
-            reader.readAsDataURL(groupImage);
-        } else {
-            const newGroup = {
-                name: groupName,
-                image: null,
-                description: groupDescription,
-                users: usersInfo,
-                messages: [],
-            };
-            groups.push(newGroup);
-            saveGroups();
-            renderGroups();
-            createGroupModal.style.display = "none";
-        }
-    });
-
-    sendMessageBtn.addEventListener("click", sendMessage);
-
-    messageInput.addEventListener("keypress", (event) => {
-        if (event.key === "Enter") {
-            sendMessage();
-        }
-    });
-
-    function initialize() {
-        renderGroups();
-        currentUser = prompt("Please enter your name to start chatting:");
+      users.push({
+        name: userName,
+        image: userImage || "default_user.png",
+        country: userCountry,
+        description: userDescription,
+        isOwner: isOwner,
+        isModerator: isModerator,
+      });
     }
 
-    initialize();
+    const group = {
+      name: groupName,
+      image: groupImage || `https://via.placeholder.com/150x150.png?text=${groupName.charAt(0)}+${groupName.charAt(groupName.length - 1)}`,
+      description: groupDescription,
+      users: users,
+      messages: [],
+      currentUser: users.find(user => user.isOwner) || users[0],
+    };
+
+    groups.push(group);
+    saveGroups();
+    displayGroups();
+  };
+
+  // عرض خيارات الحسابات لتبديل المستخدم
+  function showAccountSwitchOptions(groupIndex) {
+    const group = groups[groupIndex];
+    let options = "اختر حسابًا للدردشة:\n";
+    group.users.forEach((user, index) => {
+      options += `${index + 1}. ${user.name} (${user.isOwner ? "المالك" : user.isModerator ? "مشرف" : "مستخدم"})\n`;
+    });
+    const selectedUserIndex = parseInt(prompt(options)) - 1;
+    group.currentUser = group.users[selectedUserIndex];
+    saveGroups();
+    openChat(groupIndex);
+  }
+
+  // عرض خيارات تعديل أو حذف القروب
+  function showGroupOptions(groupIndex) {
+    const group = groups[groupIndex];
+    const option = prompt("اختر خيارًا:\n1. تعديل القروب\n2. حذف القروب");
+
+    if (option === "1") {
+      editGroup(groupIndex);
+    } else if (option === "2") {
+      if (confirm(`هل أنت متأكد أنك تريد حذف القروب "${group.name}"؟`)) {
+        groups.splice(groupIndex, 1);
+        saveGroups();
+        displayGroups();
+      }
+    }
+  }
+
+  // تعديل القروب
+  function editGroup(groupIndex) {
+    const group = groups[groupIndex];
+    const groupName = prompt("أدخل اسم القروب:", group.name);
+    const groupImage = prompt("أدخل رابط صورة بروفايل القروب (اختياري):", group.image);
+    const groupDescription = prompt("أدخل نبذة عن القروب:", group.description);
+    const groupUsersCount = parseInt(prompt("أدخل عدد المستخدمين:", group.users.length));
+    const users = [];
+
+    for (let i = 0; i < groupUsersCount; i++) {
+      const user = group.users[i] || {};
+      const userName = prompt(`أدخل اسم المستخدم ${i + 1}:`, user.name || "");
+      const userImage = prompt(`أدخل رابط صورة المستخدم ${i + 1} (اختياري):`, user.image || "");
+      const userCountry = prompt(`أدخل بلد المستخدم ${i + 1}:`, user.country || "");
+      const userDescription = prompt(`أدخل نبذة عن المستخدم ${i + 1}:`, user.description || "");
+      const isOwner = confirm(`هل المستخدم ${userName} هو المالك؟`);
+      const isModerator = confirm(`هل المستخدم ${userName} هو مشرف؟`);
+
+      users.push({
+        name: userName,
+        image: userImage || "default_user.png",
+        country: userCountry,
+        description: userDescription,
+        isOwner: isOwner,
+        isModerator: isModerator,
+      });
+    }
+
+    group.name = groupName;
+    group.image = groupImage || `https://via.placeholder.com/150x150.png?text=${groupName.charAt(0)}+${groupName.charAt(groupName.length - 1)}`;
+    group.description = groupDescription;
+    group.users = users;
+
+    saveGroups();
+    displayGroups();
+    openChat(groupIndex);
+  }
+
+  // تعديل تاريخ ووقت الرسالة
+  function editMessageTimestamp(message) {
+    const newTimestamp = prompt("أدخل الوقت والتاريخ الجديد:", message.timestamp);
+    if (newTimestamp) {
+      message.timestamp = newTimestamp;
+      saveGroups();
+      displayGroups();
+    }
+  }
+
+  // عرض القروبات عند تحميل الصفحة
+  displayGroups();
 });
