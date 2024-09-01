@@ -10,9 +10,12 @@ const groupForm = document.getElementById('group-form');
 const groupImageInput = document.getElementById('group-image');
 const userDetails = document.getElementById('user-details');
 const userCountInput = document.getElementById('user-count');
+const closeModalBtn = document.querySelector('.close');
 
 // Event Listeners
 createGroupBtn.addEventListener('click', openGroupModal);
+closeModalBtn.addEventListener('click', closeGroupModal);
+window.addEventListener('click', outsideClickCloseModal);
 groupForm.addEventListener('submit', createGroup);
 userCountInput.addEventListener('input', generateUserFields);
 
@@ -37,6 +40,12 @@ function openGroupModal() {
 
 function closeGroupModal() {
     groupModal.style.display = 'none';
+}
+
+function outsideClickCloseModal(event) {
+    if (event.target === groupModal) {
+        closeGroupModal();
+    }
 }
 
 function createGroup(e) {
@@ -126,80 +135,29 @@ function generateDefaultImage(groupName) {
     return canvas.toDataURL();
 }
 
-function openChat(groupIndex) {
-    const group = groups[groupIndex];
-    document.getElementById('chat-group-name').textContent = group.name;
+function openChat(index) {
+    const group = groups[index];
+    document.getElementById('chat-group-name').innerText = group.name;
     document.getElementById('chat-group-image').src = group.image || generateDefaultImage(group.name);
+    
     chatModal.style.display = 'flex';
-    renderMessages(groupIndex);
+    renderMessages(index);
 }
 
 function renderMessages(groupIndex) {
     const chatContent = document.getElementById('chat-content');
     chatContent.innerHTML = '';
-    const group = groups[groupIndex];
-
-    group.messages.forEach((message, messageIndex) => {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${message.sentBy === 'me' ? 'sent' : 'received'}`;
-        messageDiv.innerHTML = `
-            <strong>${message.username} ${message.isOwner ? '(Owner)' : message.isAdmin ? '(Admin)' : ''}</strong>
-            <p>${message.content}</p>
+    
+    groups[groupIndex].messages.forEach((message, messageIndex) => {
+        const messageElement = document.createElement('div');
+        messageElement.className = `message ${message.sentByUser ? 'sent' : 'received'}`;
+        messageElement.innerHTML = `
+            <div>${message.text}</div>
             <div class="meta">
-                <span class="time">${message.timestamp}</span>
-                <img src="${message.userImage || generateDefaultImage(message.username)}" alt="User Image">
+                <span>${message.senderName} ${message.isOwner ? 'Owner' : message.isAdmin ? 'Admin' : ''}</span>
+                <span>${message.timestamp}</span>
             </div>
         `;
-        messageDiv.addEventListener('longpress', () => editMessage(groupIndex, messageIndex));
-        chatContent.appendChild(messageDiv);
+        chatContent.appendChild(messageElement);
     });
 }
-
-function editMessage(groupIndex, messageIndex) {
-    const newTimestamp = prompt('Edit the timestamp (YYYY-MM-DD HH:MM:SS):');
-    if (newTimestamp) {
-        groups[groupIndex].messages[messageIndex].timestamp = newTimestamp;
-        localStorage.setItem('groups', JSON.stringify(groups));
-        renderMessages(groupIndex);
-    }
-}
-
-document.getElementById('send-message-btn').addEventListener('click', () => {
-    const groupIndex = groups.findIndex(group => group.name === document.getElementById('chat-group-name').textContent);
-    const messageContent = document.getElementById('chat-message').value;
-    const activeUser = 'me';  // Replace with logic to get the active user
-    const activeUserDetails = groups[groupIndex].users.find(user => user.username === activeUser);
-
-    if (messageContent) {
-        const newMessage = {
-            content: messageContent,
-            timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
-            username: activeUserDetails.username,
-            isOwner: activeUserDetails.isOwner,
-            isAdmin: activeUserDetails.isAdmin,
-            userImage: activeUserDetails.image,
-            sentBy: 'me'
-        };
-        groups[groupIndex].messages.push(newMessage);
-        localStorage.setItem('groups', JSON.stringify(groups));
-        renderMessages(groupIndex);
-        document.getElementById('chat-message').value = '';
-    }
-});
-
-function longpress(element, callback) {
-    let timer;
-    element.addEventListener('mousedown', () => {
-        timer = setTimeout(callback, 10000);
-    });
-
-    element.addEventListener('mouseup', () => clearTimeout(timer));
-    element.addEventListener('mouseout', () => clearTimeout(timer));
-}
-
-document.querySelectorAll('.message .time').forEach(timeElement => {
-    longpress(timeElement, () => editMessage());
-});
-
-// Initial Render
-renderGroups();
