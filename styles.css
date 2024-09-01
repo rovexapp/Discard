@@ -1,37 +1,42 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f1f1f1;
+body, html {
     margin: 0;
     padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .container {
-    width: 100%;
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.groups-list {
+    width: 375px;
+    height: 667px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+}
+
+header {
+    padding: 20px;
+    background-color: #1877f2;
+    color: white;
+    text-align: center;
+    font-size: 24px;
+}
+
+main {
+    flex: 1;
+    overflow-y: auto;
 }
 
 .group-item {
     display: flex;
     align-items: center;
-    background-color: #ececec;
     padding: 10px;
-    border-radius: 5px;
+    border-bottom: 1px solid #ddd;
     cursor: pointer;
 }
 
@@ -39,119 +44,112 @@ body {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    margin-right: 10px;
+    margin-right: 15px;
 }
 
-.add-group-btn {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
+.group-item h3 {
+    margin: 0;
+}
+
+footer {
+    padding: 10px;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: flex-end;
+}
+
+footer button {
+    font-size: 24px;
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    border-radius: 50%;
     width: 50px;
     height: 50px;
-    border-radius: 50%;
-    background-color: #007bff;
-    color: white;
-    font-size: 24px;
-    border: none;
     cursor: pointer;
 }
 
 .modal {
     display: none;
     position: fixed;
-    top: 0;
+    z-index: 1;
     left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0,0,0,0.5);
     justify-content: center;
     align-items: center;
 }
 
 .modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    width: 80%;
-    max-width: 500px;
-}
-
-.close-btn {
-    float: right;
-    cursor: pointer;
-    font-size: 24px;
-}
-
-.chat-window {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
     background-color: white;
-    display: flex;
-    flex-direction: column;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
 }
 
 .chat-header {
     display: flex;
     align-items: center;
-    padding: 20px;
-    background-color: #007bff;
+    padding: 10px;
+    background-color: #1877f2;
     color: white;
 }
 
 .chat-header img {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     margin-right: 10px;
 }
 
-.messages {
+.chat-footer {
+    display: flex;
+    padding: 10px;
+    background-color: #f0f2f5;
+}
+
+.chat-footer input {
     flex: 1;
-    padding: 20px;
-    overflow-y: auto;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    margin-right: 10px;
+}
+
+.chat-footer button {
+    padding: 10px 20px;
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
 }
 
 .message {
-    margin-bottom: 10px;
     padding: 10px;
+    margin: 5px;
     border-radius: 10px;
     max-width: 70%;
 }
 
-.message.mine {
-    background-color: #007bff;
-    color: white;
+.message.sent {
+    background-color: #DCF8C6;
     align-self: flex-end;
 }
 
-.message.other {
-    background-color: #ececec;
+.message.received {
+    background-color: #ffffff;
     align-self: flex-start;
+    border: 1px solid #ccc;
 }
 
-.message-input {
+.message .meta {
+    font-size: 10px;
+    color: #555;
     display: flex;
-    padding: 10px;
-    background-color: #ececec;
-}
-
-.message-input input {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    margin-right: 10px;
-}
-
-.message-input button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    justify-content: space-between;
+    margin-top: 5px;
 }
