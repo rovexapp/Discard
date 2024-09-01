@@ -10,52 +10,39 @@
     <div class="container">
         <div class="header">
             <h1>My Groups</h1>
-            <button id="addGroupBtn">+ Add Group</button>
         </div>
-        <div id="groupList" class="group-list">
-            <!-- Dynamic Group List -->
+        <div class="groups-list" id="groups-list">
+            <!-- القروبات ستظهر هنا -->
         </div>
+        <button id="add-group-btn" class="add-group-btn">+</button>
     </div>
 
-    <!-- Modal for Creating a New Group -->
-    <div id="groupModal" class="modal">
+    <!-- نافذة لإنشاء قروب جديد -->
+    <div id="create-group-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
+            <span class="close-btn" id="close-modal">&times;</span>
             <h2>Create New Group</h2>
-            <form id="createGroupForm">
-                <label for="groupName">Group Name:</label>
-                <input type="text" id="groupName" required>
-                
-                <label for="groupImage">Group Profile Image (optional):</label>
-                <input type="file" id="groupImage" accept="image/*">
-                
-                <label for="groupDescription">Group Description:</label>
-                <textarea id="groupDescription" required></textarea>
-                
-                <label for="userCount">Number of Users:</label>
-                <input type="number" id="userCount" min="1" required>
-                
-                <div id="userFields">
-                    <!-- User Fields will be dynamically generated here -->
-                </div>
-                
-                <button type="submit">Create Group</button>
-            </form>
+            <input type="text" id="group-name" placeholder="Group Name">
+            <input type="file" id="group-image">
+            <textarea id="group-description" placeholder="Group Description"></textarea>
+            <input type="number" id="num-users" placeholder="Number of Users">
+            <div id="users-info"></div>
+            <button id="create-group-btn">Create Group</button>
         </div>
     </div>
 
-    <!-- Chat Page -->
-    <div id="chatPage" class="chat-page hidden">
+    <!-- نافذة الدردشة -->
+    <div id="chat-window" class="chat-window">
         <div class="chat-header">
-            <img id="chatGroupImage" src="" alt="Group Image">
-            <h2 id="chatGroupName"></h2>
+            <img id="chat-group-image" class="chat-group-image" src="" alt="Group Image">
+            <h2 id="chat-group-name"></h2>
         </div>
-        <div id="chatMessages" class="chat-messages">
-            <!-- Chat messages will appear here -->
+        <div class="messages" id="messages">
+            <!-- الرسائل ستظهر هنا -->
         </div>
         <div class="message-input">
-            <input type="text" id="messageInput" placeholder="Type a message...">
-            <button id="sendMessageBtn">Send</button>
+            <input type="text" id="message-input" placeholder="Type your message...">
+            <button id="send-message-btn">Send</button>
         </div>
     </div>
 
