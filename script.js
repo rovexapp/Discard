@@ -1,142 +1,88 @@
-const addGroupBtn = document.getElementById('add-group-btn');
-const addGroupModal = document.getElementById('add-group-modal');
-const closeModal = document.getElementById('close-modal');
-const addGroupForm = document.getElementById('add-group-form');
-const groupList = document.getElementById('group-list');
-const usersInfo = document.getElementById('users-info');
-let groups = [];
+document.addEventListener('DOMContentLoaded', function () {
+    const groupList = document.getElementById('group-list');
+    const addGroupModal = document.getElementById('add-group-modal');
 
-addGroupBtn.addEventListener('click', () => {
-    addGroupModal.style.display = 'block';
-});
+    // تحميل القروبات من Local Storage
+    let groups = JSON.parse(localStorage.getItem('groups')) || [];
 
-closeModal.addEventListener('click', () => {
-    addGroupModal.style.display = 'none';
-    clearForm();
-});
-
-window.addEventListener('click', (event) => {
-    if (event.target == addGroupModal) {
-        addGroupModal.style.display = 'none';
-        clearForm();
+    function saveGroups() {
+        localStorage.setItem('groups', JSON.stringify(groups));
     }
-});
 
-addGroupForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const groupName = document.getElementById('group-name').value;
-    const groupProfilePic = document.getElementById('group-profile-pic').files[0];
-    const groupDescription = document.getElementById('group-description').value;
-    const groupUsersCount = parseInt(document.getElementById('group-users').value);
-
-    const users = [];
-    for (let i = 0; i < groupUsersCount; i++) {
-        const userName = document.getElementById(`user-name-${i}`).value;
-        const userProfilePic = document.getElementById(`user-profile-pic-${i}`).files[0];
-        const userCountry = document.getElementById(`user-country-${i}`).value;
-        const userDescription = document.getElementById(`user-description-${i}`).value;
-        const isOwner = document.getElementById(`user-owner-${i}`).checked;
-        const isModerator = document.getElementById(`user-moderator-${i}`).checked;
-
-        users.push({
-            userName,
-            userProfilePic,
-            userCountry,
-            userDescription,
-            isOwner,
-            isModerator
+    function renderGroups() {
+        groupList.innerHTML = '';
+        groups.forEach((group, index) => {
+            const groupItem = document.createElement('div');
+            groupItem.classList.add('group-item');
+            groupItem.innerHTML = `
+                <img src="${group.image || generateDefaultImage(group.name)}" alt="صورة القروب">
+                <h3>${group.name}</h3>
+                <button onclick="deleteGroup(${index})">حذف</button>
+            `;
+            groupItem.onclick = function () {
+                openChat(index);
+            };
+            groupList.appendChild(groupItem);
         });
     }
 
-    const group = {
-        groupName,
-        groupProfilePic: groupProfilePic ? URL.createObjectURL(groupProfilePic) : generateDefaultProfilePic(groupName),
-        groupDescription,
-        users
-    };
+    function openAddGroupModal() {
+        // منطق فتح النافذة المنبثقة لإنشاء قروب جديد
+        const name = prompt('أدخل اسم القروب:');
+        const image = prompt('أدخل رابط الصورة (اختياري):');
+        const description = prompt('أدخل نبذة عن القروب:');
+        const usersCount = prompt('أدخل عدد المستخدمين:');
 
-    groups.push(group);
-    renderGroup(group);
-    addGroupModal.style.display = 'none';
-    clearForm();
-});
+        const users = [];
+        for (let i = 0; i < usersCount; i++) {
+            const userName = prompt(`أدخل اسم المستخدم ${i + 1}:`);
+            const userImage = prompt(`أدخل رابط صورة المستخدم ${i + 1} (اختياري):`);
+            const userCountry = prompt(`أدخل البلد للمستخدم ${i + 1}:`);
+            const userDescription = prompt(`أدخل نبذة عن المستخدم ${i + 1}:`);
+            const isOwner = confirm(`هل هذا المستخدم ${i + 1} هو المالك؟`);
+            const isAdmin = confirm(`هل هذا المستخدم ${i + 1} مشرف؟`);
 
-document.getElementById('group-users').addEventListener('input', (e) => {
-    const usersCount = parseInt(e.target.value);
-    renderUserFields(usersCount);
-});
+            users.push({
+                name: userName,
+                image: userImage,
+                country: userCountry,
+                description: userDescription,
+                isOwner: isOwner,
+                isAdmin: isAdmin
+            });
+        }
 
-function renderGroup(group) {
-    const groupItem = document.createElement('li');
-    groupItem.classList.add('group-item');
+        const newGroup = {
+            name: name,
+            image: image,
+            description: description,
+            users: users
+        };
 
-    const groupImage = document.createElement('img');
-    groupImage.src = group.groupProfilePic;
-
-    const groupInfo = document.createElement('div');
-    groupInfo.innerHTML = `<strong>${group.groupName}</strong><br>${group.groupDescription}`;
-
-    groupItem.appendChild(groupImage);
-    groupItem.appendChild(groupInfo);
-
-    groupList.appendChild(groupItem);
-}
-
-function renderUserFields(count) {
-    usersInfo.innerHTML = '';
-    for (let i = 0; i < count; i++) {
-        const userFieldset = document.createElement('fieldset');
-        userFieldset.innerHTML = `
-            <legend>معلومات المستخدم ${i + 1}</legend>
-            <label for="user-name-${i}">اسم المستخدم:</label>
-            <input type="text" id="user-name-${i}" required>
-
-            <label for="user-profile-pic-${i}">صورة شخصية (اختياري):</label>
-            <input type="file" id="user-profile-pic-${i}" accept="image/*">
-
-            <label for="user-country-${i}">البلد:</label>
-            <input type="text" id="user-country-${i}" required>
-
-            <label for="user-description-${i}">نبذة عن المستخدم:</label>
-            <textarea id="user-description-${i}"></textarea>
-
-            <label for="user-owner-${i}">مالك:</label>
-            <input type="radio" name="group-owner" id="user-owner-${i}" value="${i}">
-
-            <label for="user-moderator-${i}">مشرف:</label>
-            <input type="checkbox" id="user-moderator-${i}">
-        `;
-        usersInfo.appendChild(userFieldset);
+        groups.push(newGroup);
+        saveGroups();
+        renderGroups();
     }
-}
 
-function clearForm() {
-    document.getElementById('group-name').value = '';
-    document.getElementById('group-profile-pic').value = '';
-    document.getElementById('group-description').value = '';
-    document.getElementById('group-users').value = '';
-    usersInfo.innerHTML = '';
-}
+    function generateDefaultImage(groupName) {
+        const initials = groupName.split(' ').map(word => word.charAt(0)).join('');
+        const colors = ['#f28b82', '#fbbc04', '#34a853', '#4285f4', '#ea4335'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
 
-function generateDefaultProfilePic(groupName) {
-    const initials = groupName.split(' ').map(word => word[0]).join('');
-    const colors = ['#ff6347', '#4682b4', '#32cd32', '#ff4500', '#daa520'];
-    const color = colors[Math.floor(Math.random() * colors.length)];
+        return `https://via.placeholder.com/50/${color.substring(1)}/ffffff?text=${initials}`;
+    }
 
-    const canvas = document.createElement('canvas');
-    canvas.width = 50;
-    canvas.height = 50;
-    const ctx = canvas.getContext('2d');
+    function deleteGroup(index) {
+        groups.splice(index, 1);
+        saveGroups();
+        renderGroups();
+    }
 
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, 50, 50);
+    function openChat(groupIndex) {
+        const group = groups[groupIndex];
+        alert(`دخول للدردشة مع ${group.name}`);
+        // هنا يمكن فتح صفحة الدردشة الخاصة بالقروب
+    }
 
-    ctx.font = '24px Arial';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(initials, 25, 25);
-
-    return canvas.toDataURL();
-}
+    renderGroups();
+});
