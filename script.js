@@ -2,6 +2,8 @@ const chatBox = document.getElementById('chat-box');
 const messageInput = document.getElementById('message-input');
 const sendBtn = document.getElementById('send-btn');
 const channelList = document.getElementById('channel-list');
+const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+const sidebar = document.getElementById('sidebar');
 let activeChannel = 'general';
 
 const maxUsers = 13;
@@ -36,6 +38,10 @@ channelList.addEventListener('click', (e) => {
         activeChannel = e.target.dataset.channel;
         loadMessages(activeChannel);
     }
+});
+
+toggleSidebarBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('hidden');
 });
 
 function addMessage(user, text, channel) {
