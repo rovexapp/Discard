@@ -56,6 +56,7 @@ body {
     display: flex;
     flex-direction: column;
     background-color: #36393f;
+    position: relative;
 }
 
 .chat-box {
@@ -68,8 +69,39 @@ body {
 .message {
     margin: 10px 0;
     padding: 10px;
+    max-width: 60%;
+    border-radius: 15px;
+    position: relative;
     background-color: #7289da;
-    border-radius: 5px;
+    align-self: flex-start;
+    clear: both;
+}
+
+.message.user {
+    background-color: #43b581;
+    align-self: flex-end;
+}
+
+.message::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    width: 0;
+    height: 0;
+}
+
+.message.user::before {
+    right: -10px;
+    border-left: 10px solid #43b581;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+}
+
+.message::before {
+    left: -10px;
+    border-right: 10px solid #7289da;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
 }
 
 .input-section {
@@ -77,6 +109,10 @@ body {
     padding: 20px;
     background-color: #2f3136;
     box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 #message-input {
