@@ -1,165 +1,133 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #2f3136;
-    color: #ffffff;
+    background-color: #f4f4f4;
     margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    padding: 0;
+    direction: rtl;
 }
 
 .app-container {
-    display: flex;
     width: 100%;
     max-width: 1200px;
-    height: 80vh;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    position: relative;
-}
-
-.sidebar {
-    width: 200px;
-    background-color: #202225;
+    margin: auto;
     padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease;
 }
 
-.sidebar.hidden {
-    transform: translateX(-200px);
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 5;
-}
-
-.sidebar h2 {
-    font-size: 1.5em;
+.group-list {
     margin-bottom: 20px;
 }
 
-#channel-list {
-    list-style: none;
+#group-list {
+    list-style-type: none;
     padding: 0;
-    margin: 0;
 }
 
-.channel {
+.group-item {
+    display: flex;
+    align-items: center;
     padding: 10px;
-    background-color: #2f3136;
+    background-color: #fff;
     margin-bottom: 10px;
     border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.channel.active,
-.channel:hover {
-    background-color: #7289da;
-}
-
-.chat-section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: #36393f;
-    position: relative;
-}
-
-.toggle-sidebar {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 10px;
-    background-color: #7289da;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    z-index: 10;
-}
-
-.toggle-sidebar:hover {
-    background-color: #5b6eae;
-}
-
-.chat-box {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    background-color: #40444b;
-    margin-left: 0;
-}
-
-.message {
-    margin: 10px 0;
-    padding: 10px;
-    max-width: 60%;
-    border-radius: 15px;
-    position: relative;
-    background-color: #7289da;
-    align-self: flex-start;
-    clear: both;
-}
-
-.message.user {
-    background-color: #43b581;
-    align-self: flex-end;
-}
-
-.message::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    width: 0;
-    height: 0;
-}
-
-.message.user::before {
-    right: -10px;
-    border-left: 10px solid #43b581;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-}
-
-.message::before {
-    left: -10px;
-    border-right: 10px solid #7289da;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-}
-
-.input-section {
-    display: flex;
-    padding: 20px;
-    background-color: #2f3136;
-    box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.2);
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-#message-input {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
+.group-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
     margin-right: 10px;
 }
 
-#send-btn {
-    padding: 10px 20px;
-    background-color: #7289da;
-    color: #ffffff;
+.add-group-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
     border: none;
-    border-radius: 5px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-group-btn:hover {
+    background-color: #0056b3;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.close {
+    color: #aaa;
+    float: left;
+    font-size: 28px;
+    font-weight: bold;
     cursor: pointer;
 }
 
-#send-btn:hover {
-    background-color: #5b6eae;
+.close:hover,
+.close:focus {
+    color: black;
+}
+
+form label {
+    display: block;
+    margin-top: 10px;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="file"],
+form textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+form textarea {
+    resize: vertical;
+}
+
+form button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+form button[type="submit"]:hover {
+    background-color: #0056b3;
 }
