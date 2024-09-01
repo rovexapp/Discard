@@ -3,42 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>صفحة القروبات</title>
+    <title>إدارة القروبات</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="groups-list">
+    <div class="app-container">
+        <div class="group-list">
             <h1>قائمة القروبات</h1>
-            <div id="groups-container">
-                <!-- يتم عرض القروبات هنا -->
-            </div>
+            <ul id="group-list">
+                <!-- قائمة القروبات ستظهر هنا -->
+            </ul>
         </div>
-        <button id="add-group-button" class="add-group-button">+</button>
+        <button id="add-group-btn" class="add-group-btn">+</button>
     </div>
 
-    <!-- النافذة المنبثقة لإنشاء القروب -->
-    <div id="create-group-modal" class="modal">
+    <!-- نافذة منبثقة لإضافة قروب جديد -->
+    <div id="add-group-modal" class="modal">
         <div class="modal-content">
             <span id="close-modal" class="close">&times;</span>
-            <h2>إنشاء قروب جديد</h2>
-            <form id="create-group-form">
+            <h2>إضافة قروب جديد</h2>
+            <form id="add-group-form">
                 <label for="group-name">اسم القروب:</label>
                 <input type="text" id="group-name" required>
-                <label for="group-profile-picture">صورة بروفايل القروب:</label>
-                <input type="file" id="group-profile-picture">
-                <label for="group-description">وصف القروب:</label>
-                <textarea id="group-description" required></textarea>
-                <label for="num-users">عدد المستخدمين:</label>
-                <input type="number" id="num-users" min="1" required>
-                <div id="users-container">
-                    <!-- حقول المستخدمين تظهر هنا -->
+
+                <label for="group-profile-pic">صورة بروفايل القروب (اختياري):</label>
+                <input type="file" id="group-profile-pic" accept="image/*">
+
+                <label for="group-description">نبذة عن القروب:</label>
+                <textarea id="group-description"></textarea>
+
+                <label for="group-users">عدد المستخدمين:</label>
+                <input type="number" id="group-users" min="1" max="13" required>
+
+                <div id="users-info">
+                    <!-- معلومات المستخدمين ستظهر هنا -->
                 </div>
+
                 <button type="submit">إنشاء القروب</button>
             </form>
         </div>
     </div>
 
-    <script src="scripts.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
