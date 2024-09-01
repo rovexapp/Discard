@@ -1,157 +1,154 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f1f1f1;
-    margin: 0;
-    padding: 0;
-}
+document.addEventListener("DOMContentLoaded", () => {
+    const groupsList = document.getElementById("groups-list");
+    const addGroupBtn = document.getElementById("add-group-btn");
+    const createGroupModal = document.getElementById("create-group-modal");
+    const closeModalBtn = document.getElementById("close-modal");
+    const createGroupBtn = document.getElementById("create-group-btn");
+    const chatWindow = document.getElementById("chat-window");
+    const chatGroupName = document.getElementById("chat-group-name");
+    const chatGroupImage = document.getElementById("chat-group-image");
+    const messagesContainer = document.getElementById("messages");
+    const messageInput = document.getElementById("message-input");
+    const sendMessageBtn = document.getElementById("send-message-btn");
 
-.container {
-    width: 100%;
-    max-width: 800px;
-    margin: auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
+    let groups = JSON.parse(localStorage.getItem("groups")) || [];
+    let currentGroup = null;
+    let currentUser = null;
 
-.header {
-    text-align: center;
-    margin-bottom: 20px;
-}
+    function saveGroups() {
+        localStorage.setItem("groups", JSON.stringify(groups));
+    }
 
-.groups-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+    function renderGroups() {
+        groupsList.innerHTML = "";
+        groups.forEach((group, index) => {
+            const groupItem = document.createElement("div");
+            groupItem.className = "group-item";
+            groupItem.innerHTML = `
+                <img src="${group.image || getDefaultGroupImage(group.name)}" alt="${group.name}">
+                <div>${group.name}</div>
+            `;
+            groupItem.addEventListener("click", () => openGroupChat(index));
+            groupsList.appendChild(groupItem);
+        });
+    }
 
-.group-item {
-    display: flex;
-    align-items: center;
-    background-color: #ececec;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
+    function openGroupChat(index) {
+        currentGroup = groups[index];
+        chatGroupName.innerText = currentGroup.name;
+        chatGroupImage.src = currentGroup.image || getDefaultGroupImage(currentGroup.name);
+        renderMessages();
+        chatWindow.style.display = "flex";
+    }
 
-.group-item img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
+    function renderMessages() {
+        messagesContainer.innerHTML = "";
+        currentGroup.messages.forEach((message) => {
+            const messageElement = document.createElement("div");
+            messageElement.className = `message ${message.sender === currentUser ? "mine" : "other"}`;
+            messageElement.innerHTML = `
+                <strong>${message.sender}</strong> - <small>${message.time}</small>
+                <p>${message.text}</p>
+            `;
+            messagesContainer.appendChild(messageElement);
+        });
+    }
 
-.add-group-btn {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: #007bff;
-    color: white;
-    font-size: 24px;
-    border: none;
-    cursor: pointer;
-}
+    function sendMessage() {
+        const text = messageInput.value.trim();
+        if (text) {
+            const message = {
+                sender: currentUser,
+                text,
+                time: new Date().toLocaleTimeString(),
+            };
+            currentGroup.messages.push(message);
+            messageInput.value = "";
+            renderMessages();
+            saveGroups();
+        }
+    }
 
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-}
+    function getDefaultGroupImage(name) {
+        const initials = name.split(" ").map(word => word[0]).join("");
+        return `https://via.placeholder.com/50/007bff/FFFFFF?text=${initials}`;
+    }
 
-.modal-content {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    width: 80%;
-    max-width: 500px;
-}
+    addGroupBtn.addEventListener("click", () => {
+        createGroupModal.style.display = "flex";
+    });
 
-.close-btn {
-    float: right;
-    cursor: pointer;
-    font-size: 24px;
-}
+    closeModalBtn.addEventListener("click", () => {
+        createGroupModal.style.display = "none";
+    });
 
-.chat-window {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-}
+    createGroupBtn.addEventListener("click", () => {
+        const groupName = document.getElementById("group-name").value.trim();
+        const groupImage = document.getElementById("group-image").files[0];
+        const groupDescription = document.getElementById("group-description").value.trim();
+        const numUsers = parseInt(document.getElementById("num-users").value.trim(), 10);
 
-.chat-header {
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    background-color: #007bff;
-    color: white;
-}
+        if (!groupName || isNaN(numUsers) || numUsers < 1) {
+            alert("Please enter a valid group name and number of users.");
+            return;
+        }
 
-.chat-header img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
+        const usersInfo = [];
+        for (let i = 0; i < numUsers; i++) {
+            const userName = prompt(`Enter name for User ${i + 1}:`);
+            const isOwner = confirm(`Is ${userName} the group owner?`);
+            const isModerator = confirm(`Is ${userName} a moderator?`);
+            usersInfo.push({
+                name: userName,
+                isOwner: isOwner,
+                isModerator: isModerator,
+            });
+        }
 
-.messages {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-}
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const newGroup = {
+                name: groupName,
+                image: e.target.result,
+                description: groupDescription,
+                users: usersInfo,
+                messages: [],
+            };
+            groups.push(newGroup);
+            saveGroups();
+            renderGroups();
+            createGroupModal.style.display = "none";
+        };
 
-.message {
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    max-width: 70%;
-}
+        if (groupImage) {
+            reader.readAsDataURL(groupImage);
+        } else {
+            const newGroup = {
+                name: groupName,
+                image: null,
+                description: groupDescription,
+                users: usersInfo,
+                messages: [],
+            };
+            groups.push(newGroup);
+            saveGroups();
+            renderGroups();
+            createGroupModal.style.display = "none";
+        }
+    });
 
-.message.mine {
-    background-color: #007bff;
-    color: white;
-    align-self: flex-end;
-}
+    sendMessageBtn.addEventListener("click", sendMessage);
 
-.message.other {
-    background-color: #ececec;
-    align-self: flex-start;
-}
+    messageInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    });
 
-.message-input {
-    display: flex;
-    padding: 10px;
-    background-color: #ececec;
-}
+    function initialize() {
+        renderGroups();
+        currentUser = prompt("Please enter your name to start chatting:");
+    }
 
-.message-input input {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    margin-right: 10px;
-}
-
-.message-input button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
+    initialize();
+});
