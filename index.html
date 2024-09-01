@@ -1,53 +1,61 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تطبيق دردشة</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Group Chat Application</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="app">
-        <!-- الصفحة الرئيسية: قائمة القروبات -->
-        <div id="group-list-page">
-            <h1>قائمة القروبات</h1>
-            <ul id="group-list"></ul>
-            <button id="add-group-btn">+ إنشاء قروب</button>
+    <div class="container">
+        <div class="header">
+            <h1>My Groups</h1>
+            <button id="addGroupBtn">+ Add Group</button>
         </div>
+        <div id="groupList" class="group-list">
+            <!-- Dynamic Group List -->
+        </div>
+    </div>
 
-        <!-- صفحة إنشاء القروب -->
-        <div id="create-group-page" style="display:none;">
-            <h1>إنشاء قروب جديد</h1>
-            <form id="create-group-form">
-                <label>اسم القروب:</label>
-                <input type="text" id="group-name" required>
-
-                <label>صورة بروفايل القروب:</label>
-                <input type="file" id="group-profile-pic">
-
-                <label>نبذة عن القروب:</label>
-                <textarea id="group-description"></textarea>
-
-                <label>عدد المستخدمين:</label>
-                <input type="number" id="user-count" min="1" required>
-
-                <div id="users-info"></div>
-
-                <button type="submit">إنشاء</button>
+    <!-- Modal for Creating a New Group -->
+    <div id="groupModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Create New Group</h2>
+            <form id="createGroupForm">
+                <label for="groupName">Group Name:</label>
+                <input type="text" id="groupName" required>
+                
+                <label for="groupImage">Group Profile Image (optional):</label>
+                <input type="file" id="groupImage" accept="image/*">
+                
+                <label for="groupDescription">Group Description:</label>
+                <textarea id="groupDescription" required></textarea>
+                
+                <label for="userCount">Number of Users:</label>
+                <input type="number" id="userCount" min="1" required>
+                
+                <div id="userFields">
+                    <!-- User Fields will be dynamically generated here -->
+                </div>
+                
+                <button type="submit">Create Group</button>
             </form>
         </div>
+    </div>
 
-        <!-- صفحة الدردشة -->
-        <div id="chat-page" style="display:none;">
-            <div id="group-header">
-                <img id="group-chat-pic" src="" alt="صورة القروب">
-                <h2 id="group-chat-name"></h2>
-            </div>
-            <div id="chat-messages"></div>
-            <div id="chat-input">
-                <input type="text" id="message-input" placeholder="اكتب رسالتك...">
-                <button id="send-message-btn">إرسال</button>
-            </div>
+    <!-- Chat Page -->
+    <div id="chatPage" class="chat-page hidden">
+        <div class="chat-header">
+            <img id="chatGroupImage" src="" alt="Group Image">
+            <h2 id="chatGroupName"></h2>
+        </div>
+        <div id="chatMessages" class="chat-messages">
+            <!-- Chat messages will appear here -->
+        </div>
+        <div class="message-input">
+            <input type="text" id="messageInput" placeholder="Type a message...">
+            <button id="sendMessageBtn">Send</button>
         </div>
     </div>
 
