@@ -1,208 +1,205 @@
-document.addEventListener("DOMContentLoaded", function () {
-  // تحميل القروبات من Local Storage
-  let groups = JSON.parse(localStorage.getItem("groups")) || [];
+// Initial Data (Local Storage or Placeholder)
+let groups = JSON.parse(localStorage.getItem('groups')) || [];
 
-  const groupListElement = document.getElementById("group-list");
-  const addGroupBtn = document.getElementById("add-group-btn");
+// Elements
+const groupList = document.getElementById('group-list');
+const createGroupBtn = document.getElementById('create-group-btn');
+const groupModal = document.getElementById('group-modal');
+const chatModal = document.getElementById('chat-modal');
+const groupForm = document.getElementById('group-form');
+const groupImageInput = document.getElementById('group-image');
+const userDetails = document.getElementById('user-details');
+const userCountInput = document.getElementById('user-count');
 
-  // عرض القروبات في القائمة
-  function displayGroups() {
-    groupListElement.innerHTML = "";
+// Event Listeners
+createGroupBtn.addEventListener('click', openGroupModal);
+groupForm.addEventListener('submit', createGroup);
+userCountInput.addEventListener('input', generateUserFields);
+
+// Functions
+function renderGroups() {
+    groupList.innerHTML = '';
     groups.forEach((group, index) => {
-      const groupElement = document.createElement("div");
-      groupElement.className = "group";
-      groupElement.innerHTML = `
-        <img src="${group.image}" alt="${group.name}" class="group-image">
-        <span class="group-name">${group.name}</span>
-      `;
-      groupElement.addEventListener("click", () => openChat(index));
-      groupElement.addEventListener("contextmenu", (e) => {
-        e.preventDefault();
-        showGroupOptions(index);
-      });
-      groupListElement.appendChild(groupElement);
+        const groupItem = document.createElement('div');
+        groupItem.className = 'group-item';
+        groupItem.innerHTML = `
+            <img src="${group.image || generateDefaultImage(group.name)}" alt="Group Image">
+            <h3>${group.name}</h3>
+        `;
+        groupItem.addEventListener('click', () => openChat(index));
+        groupList.appendChild(groupItem);
     });
-  }
+}
 
-  // فتح الدردشة للقروب
-  function openChat(groupIndex) {
-    const group = groups[groupIndex];
-    const chatElement = document.getElementById("chat");
-    const groupHeaderElement = document.getElementById("group-header");
-    const chatMessagesElement = document.getElementById("chat-messages");
-    const sendMessageBtn = document.getElementById("send-message-btn");
-    const messageInput = document.getElementById("message-input");
+function openGroupModal() {
+    groupModal.style.display = 'flex';
+}
 
-    chatMessagesElement.innerHTML = "";
+function closeGroupModal() {
+    groupModal.style.display = 'none';
+}
 
-    groupHeaderElement.innerHTML = `
-      <img src="${group.image}" alt="${group.name}" class="group-image">
-      <span class="group-name">${group.name}</span>
-    `;
-    groupHeaderElement.addEventListener("mousedown", (e) => {
-      if (e.which === 1) {
-        // إذا ضغط على الصورة لمدة 10 ثوانٍ، أظهر قائمة الحسابات
-        setTimeout(() => showAccountSwitchOptions(groupIndex), 10000);
-      }
-    });
+function createGroup(e) {
+    e.preventDefault();
+    const groupName = document.getElementById('group-name').value;
+    const groupDescription = document.getElementById('group-description').value;
+    const groupImage = groupImageInput.files[0] ? URL.createObjectURL(groupImageInput.files[0]) : null;
 
-    group.messages.forEach((message) => {
-      const messageElement = document.createElement("div");
-      messageElement.className = message.sender.isOwner ? "message owner" : "message";
-      messageElement.innerHTML = `
-        <div class="message-info">
-          <span class="message-sender">${message.sender.name} ${message.sender.isOwner ? "(المالك)" : message.sender.isModerator ? "(مشرف)" : ""}</span>
-          <span class="message-timestamp" title="Edit">${message.timestamp}</span>
-        </div>
-        <div class="message-text">${message.text}</div>
-        <img src="${message.sender.image}" alt="${message.sender.name}" class="user-image">
-      `;
-      messageElement.querySelector(".message-timestamp").addEventListener("mousedown", (e) => {
-        if (e.which === 1) {
-          // إذا ضغط على الوقت لمدة 10 ثوانٍ، اسمح بتعديل الوقت
-          setTimeout(() => editMessageTimestamp(message), 10000);
-        }
-      });
-      chatMessagesElement.appendChild(messageElement);
-    });
-
-    sendMessageBtn.onclick = function () {
-      const message = {
-        text: messageInput.value,
-        sender: group.currentUser,
-        timestamp: new Date().toLocaleString(),
-        read: false,
-      };
-      group.messages.push(message);
-      saveGroups();
-      displayGroups();
-      openChat(groupIndex);
-      messageInput.value = "";
-    };
-  }
-
-  // حفظ القروبات في Local Storage
-  function saveGroups() {
-    localStorage.setItem("groups", JSON.stringify(groups));
-  }
-
-  // إنشاء قروب جديد
-  addGroupBtn.onclick = function () {
-    const groupName = prompt("أدخل اسم القروب:");
-    const groupImage = prompt("أدخل رابط صورة بروفايل القروب (اختياري):");
-    const groupDescription = prompt("أدخل نبذة عن القروب:");
-    const groupUsersCount = parseInt(prompt("أدخل عدد المستخدمين:"));
     const users = [];
+    const userElements = document.querySelectorAll('.user-detail');
+    userElements.forEach((userElement) => {
+        const username = userElement.querySelector('.username').value;
+        const userCountry = userElement.querySelector('.country').value;
+        const userBio = userElement.querySelector('.bio').value;
+        const userImage = userElement.querySelector('.user-image').files[0] ? URL.createObjectURL(userElement.querySelector('.user-image').files[0]) : null;
+        const isOwner = userElement.querySelector('.is-owner').checked;
+        const isAdmin = userElement.querySelector('.is-admin').checked;
 
-    for (let i = 0; i < groupUsersCount; i++) {
-      const userName = prompt(`أدخل اسم المستخدم ${i + 1}:`);
-      const userImage = prompt(`أدخل رابط صورة المستخدم ${i + 1} (اختياري):`);
-      const userCountry = prompt(`أدخل بلد المستخدم ${i + 1}:`);
-      const userDescription = prompt(`أدخل نبذة عن المستخدم ${i + 1}:`);
-      const isOwner = confirm(`هل المستخدم ${userName} هو المالك؟`);
-      const isModerator = confirm(`هل المستخدم ${userName} هو مشرف؟`);
+        users.push({
+            username,
+            country: userCountry,
+            bio: userBio,
+            image: userImage,
+            isOwner,
+            isAdmin
+        });
+    });
 
-      users.push({
-        name: userName,
-        image: userImage || "default_user.png",
-        country: userCountry,
-        description: userDescription,
-        isOwner: isOwner,
-        isModerator: isModerator,
-      });
-    }
-
-    const group = {
-      name: groupName,
-      image: groupImage || `https://via.placeholder.com/150x150.png?text=${groupName.charAt(0)}+${groupName.charAt(groupName.length - 1)}`,
-      description: groupDescription,
-      users: users,
-      messages: [],
-      currentUser: users.find(user => user.isOwner) || users[0],
+    const newGroup = {
+        name: groupName,
+        description: groupDescription,
+        image: groupImage,
+        users,
+        messages: []
     };
 
-    groups.push(group);
-    saveGroups();
-    displayGroups();
-  };
+    groups.push(newGroup);
+    localStorage.setItem('groups', JSON.stringify(groups));
+    closeGroupModal();
+    renderGroups();
+}
 
-  // عرض خيارات الحسابات لتبديل المستخدم
-  function showAccountSwitchOptions(groupIndex) {
+function generateUserFields() {
+    const count = userCountInput.value;
+    userDetails.innerHTML = '';
+
+    for (let i = 0; i < count; i++) {
+        const userDetail = document.createElement('div');
+        userDetail.className = 'user-detail';
+        userDetail.innerHTML = `
+            <input type="text" class="username" placeholder="Username" required>
+            <input type="file" class="user-image" accept="image/*">
+            <input type="text" class="country" placeholder="Country" required>
+            <textarea class="bio" placeholder="Bio"></textarea>
+            <label>
+                <input type="radio" name="owner" class="is-owner"> Owner
+            </label>
+            <label>
+                <input type="checkbox" class="is-admin"> Admin
+            </label>
+        `;
+        userDetails.appendChild(userDetail);
+    }
+}
+
+function generateDefaultImage(groupName) {
+    const colors = ['#FF5733', '#33FF57', '#3357FF', '#F333FF', '#FF33A2', '#33FFF3'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const initials = groupName.split(' ').map(word => word.charAt(0)).join('').slice(0, 2).toUpperCase();
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 50;
+    canvas.height = 50;
+
+    // Background color
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Initials
+    ctx.font = '20px Arial';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(initials, canvas.width / 2, canvas.height / 2);
+
+    return canvas.toDataURL();
+}
+
+function openChat(groupIndex) {
     const group = groups[groupIndex];
-    let options = "اختر حسابًا للدردشة:\n";
-    group.users.forEach((user, index) => {
-      options += `${index + 1}. ${user.name} (${user.isOwner ? "المالك" : user.isModerator ? "مشرف" : "مستخدم"})\n`;
+    document.getElementById('chat-group-name').textContent = group.name;
+    document.getElementById('chat-group-image').src = group.image || generateDefaultImage(group.name);
+    chatModal.style.display = 'flex';
+    renderMessages(groupIndex);
+}
+
+function renderMessages(groupIndex) {
+    const chatContent = document.getElementById('chat-content');
+    chatContent.innerHTML = '';
+    const group = groups[groupIndex];
+
+    group.messages.forEach((message, messageIndex) => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${message.sentBy === 'me' ? 'sent' : 'received'}`;
+        messageDiv.innerHTML = `
+            <strong>${message.username} ${message.isOwner ? '(Owner)' : message.isAdmin ? '(Admin)' : ''}</strong>
+            <p>${message.content}</p>
+            <div class="meta">
+                <span class="time">${message.timestamp}</span>
+                <img src="${message.userImage || generateDefaultImage(message.username)}" alt="User Image">
+            </div>
+        `;
+        messageDiv.addEventListener('longpress', () => editMessage(groupIndex, messageIndex));
+        chatContent.appendChild(messageDiv);
     });
-    const selectedUserIndex = parseInt(prompt(options)) - 1;
-    group.currentUser = group.users[selectedUserIndex];
-    saveGroups();
-    openChat(groupIndex);
-  }
+}
 
-  // عرض خيارات تعديل أو حذف القروب
-  function showGroupOptions(groupIndex) {
-    const group = groups[groupIndex];
-    const option = prompt("اختر خيارًا:\n1. تعديل القروب\n2. حذف القروب");
-
-    if (option === "1") {
-      editGroup(groupIndex);
-    } else if (option === "2") {
-      if (confirm(`هل أنت متأكد أنك تريد حذف القروب "${group.name}"؟`)) {
-        groups.splice(groupIndex, 1);
-        saveGroups();
-        displayGroups();
-      }
-    }
-  }
-
-  // تعديل القروب
-  function editGroup(groupIndex) {
-    const group = groups[groupIndex];
-    const groupName = prompt("أدخل اسم القروب:", group.name);
-    const groupImage = prompt("أدخل رابط صورة بروفايل القروب (اختياري):", group.image);
-    const groupDescription = prompt("أدخل نبذة عن القروب:", group.description);
-    const groupUsersCount = parseInt(prompt("أدخل عدد المستخدمين:", group.users.length));
-    const users = [];
-
-    for (let i = 0; i < groupUsersCount; i++) {
-      const user = group.users[i] || {};
-      const userName = prompt(`أدخل اسم المستخدم ${i + 1}:`, user.name || "");
-      const userImage = prompt(`أدخل رابط صورة المستخدم ${i + 1} (اختياري):`, user.image || "");
-      const userCountry = prompt(`أدخل بلد المستخدم ${i + 1}:`, user.country || "");
-      const userDescription = prompt(`أدخل نبذة عن المستخدم ${i + 1}:`, user.description || "");
-      const isOwner = confirm(`هل المستخدم ${userName} هو المالك؟`);
-      const isModerator = confirm(`هل المستخدم ${userName} هو مشرف؟`);
-
-      users.push({
-        name: userName,
-        image: userImage || "default_user.png",
-        country: userCountry,
-        description: userDescription,
-        isOwner: isOwner,
-        isModerator: isModerator,
-      });
-    }
-
-    group.name = groupName;
-    group.image = groupImage || `https://via.placeholder.com/150x150.png?text=${groupName.charAt(0)}+${groupName.charAt(groupName.length - 1)}`;
-    group.description = groupDescription;
-    group.users = users;
-
-    saveGroups();
-    displayGroups();
-    openChat(groupIndex);
-  }
-
-  // تعديل تاريخ ووقت الرسالة
-  function editMessageTimestamp(message) {
-    const newTimestamp = prompt("أدخل الوقت والتاريخ الجديد:", message.timestamp);
+function editMessage(groupIndex, messageIndex) {
+    const newTimestamp = prompt('Edit the timestamp (YYYY-MM-DD HH:MM:SS):');
     if (newTimestamp) {
-      message.timestamp = newTimestamp;
-      saveGroups();
-      displayGroups();
+        groups[groupIndex].messages[messageIndex].timestamp = newTimestamp;
+        localStorage.setItem('groups', JSON.stringify(groups));
+        renderMessages(groupIndex);
     }
-  }
+}
 
-  // عرض القروبات عند تحميل الصفحة
-  displayGroups();
+document.getElementById('send-message-btn').addEventListener('click', () => {
+    const groupIndex = groups.findIndex(group => group.name === document.getElementById('chat-group-name').textContent);
+    const messageContent = document.getElementById('chat-message').value;
+    const activeUser = 'me';  // Replace with logic to get the active user
+    const activeUserDetails = groups[groupIndex].users.find(user => user.username === activeUser);
+
+    if (messageContent) {
+        const newMessage = {
+            content: messageContent,
+            timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+            username: activeUserDetails.username,
+            isOwner: activeUserDetails.isOwner,
+            isAdmin: activeUserDetails.isAdmin,
+            userImage: activeUserDetails.image,
+            sentBy: 'me'
+        };
+        groups[groupIndex].messages.push(newMessage);
+        localStorage.setItem('groups', JSON.stringify(groups));
+        renderMessages(groupIndex);
+        document.getElementById('chat-message').value = '';
+    }
 });
+
+function longpress(element, callback) {
+    let timer;
+    element.addEventListener('mousedown', () => {
+        timer = setTimeout(callback, 10000);
+    });
+
+    element.addEventListener('mouseup', () => clearTimeout(timer));
+    element.addEventListener('mouseout', () => clearTimeout(timer));
+}
+
+document.querySelectorAll('.message .time').forEach(timeElement => {
+    longpress(timeElement, () => editMessage());
+});
+
+// Initial Render
+renderGroups();
